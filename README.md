@@ -268,6 +268,72 @@ three-tier-vpc-compliance-checker/
 └── .gitignore                        # Git ignore rules
 
 ```
+three-tier-vpc-compliance-checker/
+│
+├── terraform/                        # Infrastructure-as-Code
+│   ├── main.tf                       # VPC, EC2, RDS, ALB, Lambda
+│   ├── variables.tf                  # Input variable definitions
+│   ├── outputs.tf                    # Output values after deployment
+│   ├── terraform.tfvars              # Your configuration values
+│   ├── user_data_web.sh              # Web server startup script
+│   ├── user_data_app.sh              # App server startup script
+│   └── README.md                     # Terraform guide
+│
+├── lambda/compliance_checker/        # Compliance scanning engine
+│   ├── compliance_checker.py         # Main Lambda function
+│   ├── requirements.txt              # Python dependencies
+│   └── checks/
+│       ├── security_groups.py        # SG compliance checks
+│       ├── networking.py             # Network compliance checks
+│       ├── database.py               # RDS compliance checks
+│       └── encryption.py             # Encryption compliance checks
+│
+├── docs/                             # Documentation
+│   ├── ARCHITECTURE.md               # Detailed design
+│   ├── DEPLOYMENT.md                 # Deployment guide
+│   ├── VPC_DESIGN.md                 # Network specification
+│   ├── COMPLIANCE_RULES.md           # Security checks
+│   └── INTERVIEW_GUIDE.md            # Interview prep
+│
+├── .github/workflows/
+│   └── deploy.yml                    # GitHub Actions CI/CD
+│
+├── README.md                         # This file
+└── .gitignore                        # Git ignore rules
+three-tier-vpc-compliance-checker/
+│
+├── terraform/                        # Infrastructure-as-Code
+│   ├── main.tf                       # VPC, EC2, RDS, ALB, Lambda
+│   ├── variables.tf                  # Input variable definitions
+│   ├── outputs.tf                    # Output values after deployment
+│   ├── terraform.tfvars              # Your configuration values
+│   ├── user_data_web.sh              # Web server startup script
+│   ├── user_data_app.sh              # App server startup script
+│   └── README.md                     # Terraform guide
+│
+├── lambda/compliance_checker/        # Compliance scanning engine
+│   ├── compliance_checker.py         # Main Lambda function
+│   ├── requirements.txt              # Python dependencies
+│   └── checks/
+│       ├── security_groups.py        # SG compliance checks
+│       ├── networking.py             # Network compliance checks
+│       ├── database.py               # RDS compliance checks
+│       └── encryption.py             # Encryption compliance checks
+│
+├── docs/                             # Documentation
+│   ├── ARCHITECTURE.md               # Detailed design
+│   ├── DEPLOYMENT.md                 # Deployment guide
+│   ├── VPC_DESIGN.md                 # Network specification
+│   ├── COMPLIANCE_RULES.md           # Security checks
+│   └── INTERVIEW_GUIDE.md            # Interview prep
+│
+├── .github/workflows/
+│   └── deploy.yml                    # GitHub Actions CI/CD
+│
+├── README.md                         # This file
+└── .gitignore                        # Git ignore rules
+
+```
 
 ---
 
@@ -295,7 +361,7 @@ After building this project I learnt mastery in:
 ##  Example Compliance Report
 
 When the Lambda function runs, you'll receive an email like:
-
+```bash
 ╔════════════════════════════════════════════════════════════╗
 ║          VPC COMPLIANCE AUDIT REPORT                       ║
 ╚════════════════════════════════════════════════════════════╝
@@ -309,6 +375,8 @@ Generated: 2024-07-11 08:00:00 UTC
 ✅ All systems compliant!
 ════════════════════════════════════════════════════════════
 Next scan: Tomorrow at 8:00 AM UTC
+```
+
 
 
 ---
