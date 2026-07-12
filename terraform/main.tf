@@ -678,7 +678,7 @@ resource "aws_db_instance" "main" {
   skip_final_snapshot         = false
   final_snapshot_identifier   = "${var.environment}-mysql-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
 
-  deletion_protection         = true
+  deletion_protection         = false
 
   tags = merge(
     var.common_tags,
