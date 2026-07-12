@@ -134,7 +134,7 @@ variable "db_password" {
 variable "db_backup_retention_days" {
   description = "Database backup retention (days)"
   type        = number
-  default     = 35
+  default     = 1
 }
 
 # ============================================================
