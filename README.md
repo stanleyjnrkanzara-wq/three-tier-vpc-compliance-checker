@@ -153,6 +153,13 @@ three-tier-vpc-compliance-checker/
 │
 ├── README.md                         # This file
 └── .gitignore                        # Git ignore rules
+
+```
+
+## Deployment commands
+
+
+```bash
 # 1. Clone and navigate
 git clone https://github.com/stanleyjnrkanzara@gmail.com/three-tier-vpc-compliance-checker.git
 cd three-tier-vpc-compliance-checker/terraform
@@ -173,7 +180,7 @@ terraform apply -var="email_address=your@email.com"
 
 ---
 
-## 💻 Tech Stack
+##  Tech Stack
 
 | Component | Technology | Purpose |
 |-----------|-----------|---------|
