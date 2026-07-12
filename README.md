@@ -1,6 +1,3 @@
-# three-tier-vpc-compliance-checker
-Production-grade three-tier VPC with automated compliance scanning, encryption, and CIS benchmark validation. Email alerts + auto-remediation for security violations.
-
 <div align="center">
 
 #  Three-Tier VPC + Compliance Checker
@@ -15,6 +12,13 @@ Production-grade three-tier VPC with automated compliance scanning, encryption, 
 [ Quick Start](#-quick-start) • [ Architecture](#-architecture) • [ Cost](#-cost) • [ Docs](#-documentation) • [ Learning](#-learning-outcomes)
 
 </div>
+
+---
+##  Architecture
+
+<img width="1536" height="1024" alt="vpc plus AI compliance checker" src="https://github.com/user-attachments/assets/bd2b8b53-5151-4da9-986a-7352f8b5fe58" />
+
+
 
 ---
 
@@ -37,12 +41,7 @@ A complete, enterprise-ready AWS infrastructure demonstrating **cloud security b
 
 ---
 
-##  Architecture
 
-![alt text](<vpc plus AI compliance checker.jpeg>)
-
-
----
 
 ##  Key Features
 
