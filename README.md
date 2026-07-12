@@ -234,7 +234,6 @@ three-tier-vpc-compliance-checker/
 │
 ├── README.md                         # This file
 └── .gitignore                        # Git ignore rules
-
 ---
 
 ##  Learning Outcomes
