@@ -1,0 +1,1 @@
+{"statusCode": 200, "body": "{\"message\": \"Compliance scan complete\", \"critical_violations\": 1, \"high_violations\": 4, \"medium_violations\": 1}"}

@@ -128,15 +128,15 @@ output "compliance_checker_log_group" {
 output "deployment_summary" {
   description = "Summary of deployed infrastructure"
   value = {
-    environment     = var.environment
-    region          = var.aws_region
-    vpc_id          = aws_vpc.main.id
-    vpc_cidr        = aws_vpc.main.cidr_block
-    alb_dns         = aws_lb.main.dns_name
-    rds_endpoint    = aws_db_instance.main.endpoint
-    web_asg_min     = aws_autoscaling_group.web.min_size
-    web_asg_max     = aws_autoscaling_group.web.max_size
-    app_asg_min     = aws_autoscaling_group.app.min_size
-    app_asg_max     = aws_autoscaling_group.app.max_size
+    environment  = var.environment
+    region       = var.aws_region
+    vpc_id       = aws_vpc.main.id
+    vpc_cidr     = aws_vpc.main.cidr_block
+    alb_dns      = aws_lb.main.dns_name
+    rds_endpoint = aws_db_instance.main.endpoint
+    web_asg_min  = aws_autoscaling_group.web.min_size
+    web_asg_max  = aws_autoscaling_group.web.max_size
+    app_asg_min  = aws_autoscaling_group.app.min_size
+    app_asg_max  = aws_autoscaling_group.app.max_size
   }
 }

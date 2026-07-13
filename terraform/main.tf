@@ -1,6 +1,6 @@
 terraform {
   required_version = ">= 1.5.0"
-  
+
   required_providers {
     aws = {
       source  = "hashicorp/aws"
@@ -151,8 +151,8 @@ resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block      = "0.0.0.0/0"
-    gateway_id      = aws_internet_gateway.main.id
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
   }
 
   tags = merge(
@@ -181,8 +181,8 @@ resource "aws_route_table" "private_app_1" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block      = "0.0.0.0/0"
-    gateway_id      = aws_internet_gateway.main.id
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
   }
 
   tags = merge(
@@ -202,8 +202,8 @@ resource "aws_route_table" "private_app_2" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block      = "0.0.0.0/0"
-    gateway_id      = aws_internet_gateway.main.id
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
   }
 
   tags = merge(
@@ -638,6 +638,26 @@ resource "aws_iam_instance_profile" "ec2_profile" {
   role        = aws_iam_role.ec2_role.name
 }
 
+resource "aws_iam_role" "lambda_compliance_checker_role" {
+  name = "lambda-compliance-checker-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "lambda.amazonaws.com"
+      }
+    }]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "lambda_basic" {
+  role       = aws_iam_role.lambda_compliance_checker_role.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+}
+
 # ============================================================
 # RDS AURORA MYSQL
 # ============================================================
@@ -655,30 +675,30 @@ resource "aws_db_subnet_group" "main" {
 }
 
 resource "aws_db_instance" "main" {
-  identifier                  = "${var.environment}-mysql-db"
-  engine                      = "mysql"
-  engine_version              = "8.0"
-  instance_class              = var.db_instance_class
-  allocated_storage           = var.db_allocated_storage
-  storage_type                = "gp3"
+  identifier        = "${var.environment}-mysql-db"
+  engine            = "mysql"
+  engine_version    = "8.0"
+  instance_class    = var.db_instance_class
+  allocated_storage = var.db_allocated_storage
+  storage_type      = "gp3"
 
-  db_name                     = var.db_name
-  username                    = var.db_username
-  password                    = var.db_password
-  db_subnet_group_name        = aws_db_subnet_group.main.name
-  vpc_security_group_ids      = [aws_security_group.db_tier.id]
+  db_name                = var.db_name
+  username               = var.db_username
+  password               = var.db_password
+  db_subnet_group_name   = aws_db_subnet_group.main.name
+  vpc_security_group_ids = [aws_security_group.db_tier.id]
 
-  multi_az                    = true
-  publicly_accessible         = false
+  multi_az            = true
+  publicly_accessible = false
 
-  backup_retention_period     = var.db_backup_retention_days
-  backup_window               = "03:00-04:00"
-  maintenance_window          = "sun:04:00-sun:05:00"
+  backup_retention_period = var.db_backup_retention_days
+  backup_window           = "03:00-04:00"
+  maintenance_window      = "sun:04:00-sun:05:00"
 
-  skip_final_snapshot         = false
-  final_snapshot_identifier   = "${var.environment}-mysql-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
+  skip_final_snapshot       = false
+  final_snapshot_identifier = "${var.environment}-mysql-final-snapshot-${formatdate("YYYY-MM-DD-hhmm", timestamp())}"
 
-  deletion_protection         = false
+  deletion_protection = false
 
   tags = merge(
     var.common_tags,
@@ -743,4 +763,86 @@ data "aws_ami" "amazon_linux_2" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
+}
+
+
+# IAM Policy for Lambda to access EC2, RDS, SNS
+resource "aws_iam_role_policy" "lambda_policy" {
+  name = "${var.environment}-lambda-policy"
+  role = aws_iam_role.lambda_compliance_checker_role.id
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect = "Allow"
+        Action = [
+          "ec2:Describe*",
+          "rds:Describe*",
+          "sns:Publish",
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ]
+        Resource = "*"
+      }
+    ]
+  })
+}
+
+# Lambda Function
+# Package your Python code into a ZIP
+data "archive_file" "lambda_zip" {
+  type        = "zip"
+  source_dir  = "${path.module}/../lambda/compliance_checker"
+  output_path = "${path.module}/compliance_checker.zip"
+}
+
+# Lambda Function
+resource "aws_lambda_function" "compliance_checker" {
+  function_name    = "${var.environment}-compliance-checker"
+  runtime          = "python3.11"
+  handler          = "compliance_checker.lambda_handler"
+  role             = aws_iam_role.lambda_compliance_checker_role.arn
+  filename         = data.archive_file.lambda_zip.output_path
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+
+  timeout     = 300
+  memory_size = 512
+
+  environment {
+    variables = {
+      SNS_TOPIC_ARN           = aws_sns_topic.compliance_alerts.arn
+      ENABLE_AUTO_REMEDIATION = var.enable_auto_remediation
+    }
+  }
+
+  depends_on = [aws_iam_role_policy.lambda_policy]
+}
+
+
+# EventBridge Rule - Daily Trigger
+resource "aws_cloudwatch_event_rule" "daily_compliance_check" {
+  name                = "${var.environment}-daily-compliance-check"
+  description         = "Trigger compliance checker daily at 8 AM UTC"
+  schedule_expression = var.compliance_check_schedule
+  state               = "ENABLED"
+
+  tags = var.common_tags
+}
+
+# EventBridge Target - Link Rule to Lambda
+resource "aws_cloudwatch_event_target" "lambda_target" {
+  rule      = aws_cloudwatch_event_rule.daily_compliance_check.name
+  target_id = "ComplianceCheckerLambda"
+  arn       = aws_lambda_function.compliance_checker.arn
+}
+
+# Lambda Permission - Allow EventBridge to invoke
+resource "aws_lambda_permission" "allow_eventbridge" {
+  statement_id  = "AllowExecutionFromEventBridge"
+  action        = "lambda:InvokeFunction"
+  function_name = aws_lambda_function.compliance_checker.function_name
+  principal     = "events.amazonaws.com"
+  source_arn    = aws_cloudwatch_event_rule.daily_compliance_check.arn
 }
